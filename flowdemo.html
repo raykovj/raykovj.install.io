@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="js/css/flowdemo.css" type="text/css" />
+    <link rel="stylesheet" href="libs/jquery-ui/jquery-ui-1.12.1/jquery-ui.theme.css" type="text/css" />
+    <link rel="stylesheet" href="libs/jquery-ui/jquery-ui-1.12.1/jquery-ui.css" type="text/css" />
+
+    <script data-main="js/flowdemo" src="libs/require/require.js"></script>
+    <link rel="stylesheet" href="libs/spectrum/spectrum.css"  type="text/css"/>
+
+    <title>JDElite Flowchart Builder</title>
+</head>
+ 
+<body>
+
+    <div style="padding-bottom: 2px; ">
+        <div class="top-toolbar">
+            <div id="toolbarId" class="actions-toolbar">
+                <button id="menuId" class="toolbar-button button-menu" data-toggle="tooltip" title="Main Menu..."></button>
+                <span style="margin-left: 10px;"></span>
+                <button id="newId" class="toolbar-button button-new" data-toggle="tooltip" title="Create Flowchart..."></button>
+                <button id="openId" class="toolbar-button button-no-left button-open" data-toggle="tooltip" title="Open Flowchart..."></button>
+                <!--<button id="importId" class="toolbar-button button-no-left button-import" data-toggle="tooltip" title="Import Flowchart..."></button>-->
+                <span style="margin-left: 10px;"></span>
+                <button id="undoId" class="toolbar-button button-undo" data-toggle="tooltip" title="Undo"></button>
+                <button id="redoId" class="toolbar-button button-no-left button-redo" data-toggle="tooltip" title="Redo"></button>
+                <span style="margin-left: 10px;"></span>
+                <button id="deleteId" class="toolbar-button button-delete" data-toggle="tooltip" title="Remove Selections"></button>
+                <button id="copyId" class="toolbar-button button-no-left button-copy" data-toggle="tooltip" title="Copy Selections"></button>
+                <button id="pasteId" class="toolbar-button button-no-left button-paste" data-toggle="tooltip" title="Paste Selections"></button>
+                <span style="margin-left: 10px;"></span>
+                <button id="saveId" class="toolbar-button button-save" data-toggle="tooltip" title="Save"></button>
+                <button id="saveAsId" class="toolbar-button button-no-left button-saveAs" data-toggle="tooltip" title="Save As..."></button>
+                <span style="margin-left: 10px;"></span>
+                <button id="configId" class="toolbar-button button-config" data-toggle="tooltip" title="Settings..."></button>
+                <button id="helpId" class="toolbar-button button-no-left button-help" data-toggle="tooltip" title="Help..."></button>
+            </div>
+            <div>
+                <span style="margin-left: 10px;"></span>
+            </div>
+            <div id="toolbar2Id" class="diagram-toolbar">
+                <button id="refreshId" class="toolbar-button button-refresh" data-toggle="tooltip" title="Refresh Flowchart & Reset Scaling"></button>
+                <button id="findId" class="toolbar-button button-no-left button-find" data-toggle="tooltip"
+                        title="Search... &nbsp;&nbsp;Ctrl+Shift+F"></button>
+                <button id="clearId" class="toolbar-button button-no-left button-clear" data-toggle="tooltip" title="Clear Flowchart"></button>
+                <button id="leftId" class="toolbar-button button-no-left button-left" data-toggle="tooltip" title="Previous Flowchart"></button>
+                <button id="rightId" class="toolbar-button button-no-left button-right" data-toggle="tooltip" title="Next Flowchart"></button>
+            </div>
+            <div>
+                <span style="margin-left: 10px;"></span>
+            </div>
+            <div id="diagramNameId" style=" margin: 0 0 2px 0;">
+                <div class="diagram-title">
+                    <span class="selectionFont" style="padding: 4px 2px 0 8px;">Flowchart:</span>
+                </div>
+                <div class="diagram-name">
+                    <span class="selectionFont" style="padding: 4px 2px 0 6px; "
+                        data-bind="text: diagramDisplayName()"></span>
+                </div>
+            </div>
+            <span style="margin-left: 2px;"></span>
+        </div>
+    </div>
+
+    <div id="topContainerId" class="top-container">
+        <div id="containerId" class="main-container" onscroll="repaintDiagram()">
+            <canvas id="canvasId" tabindex="0" draggable="true" class="flex-canvas"
+                data-bind="visible: isCanvasVisible()"></canvas>
+
+            <!--<div id="topProgressId" class="progressBar-settings progressBarShow" data-bind="visible: isProgressBarVisible()" >-->
+                <!--<div id="progressBarId" class="progressBar-settings-in" data-bind="visible: isProgressBarVisible()" ></div>-->
+            <!--</div>-->
+        </div>
+
+        <div id="topProgressId" class="progressBar-settings progressBarShow" data-bind="visible: isProgressBarVisible()" >
+            <div id="progressBarId" class="progressBar-settings-in" data-bind="visible: isProgressBarVisible()" ></div>
+        </div>
+
+        <div id="paletteCtrId" class="palette-content">
+            <div class="group-box current-settings">
+                <div data-bind="visible: isCanvasVisible()" >
+                    <input type="range" min="65" max="200" value="100" id="scaleId" class="scaleSlider">
+                </div>
+                <div class="main-props diagram-text galleryFont">
+                    <div class="main-props-row">
+                        <div class="main-props-cell1">
+                            <span style="font-weight: bold;">Canvas Scale:</span>
+                        </div>
+                        <div class="main-props-cell2">
+                            <span class="selectionFont" style="padding: 4px 2px 0 6px; "
+                                data-bind="text: scaleValue()"></span>
+                        </div>
+                    </div>
+                    <!-- ALLOW AUTO LAYOUT -->
+                    <!--<div class="main-props-row" data-bind="visible: isAutoLayoutAllowed()">-->
+                        <!--<div class="main-props-cell1">-->
+                            <!--<span style="font-weight: bold;">Test Auto:</span>-->
+                        <!--</div>-->
+                        <!--<div class="main-props-cell2">-->
+                            <!--&lt;!&ndash;<input type="checkbox" id="chkSelectAutoId" style="margin: 4px 4px 0 6px;">&ndash;&gt;-->
+                            <!--<button id="testAutoId" class="testAutoId" data-bind="click: forceTestAutoMode">A</button>-->
+                            <!--<button id="resetAutoId" class="testAutoId" data-bind="click: resetTestAutoMode">X</button>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <!-- ALLOW END -->
+                    <div class="main-props-row" data-bind="visible: isCanvasVisible()">
+                        <div class="main-props-cell1">
+                            <span style="font-weight: bold;">Edit Mode:</span>
+                        </div>
+                        <div class="main-props-cell2">
+                            <span style="font-weight: bold; margin: 4px 0 0 6px;"
+                                  data-bind="text: editModeText()"></span>
+                        </div>
+                    </div>
+                    <div class="main-props-row" >
+                        <div class="main-props-cell1" >
+                            <span style="font-weight: bold;">Data Flow:</span>
+                        </div>
+                        <div class="main-props-cell2" >
+                            <button id="btnFlowHId" class="flow-button button-h" style="vertical-align: middle; "
+                                    data-bind="visible : isHorizontal()" title="Double-click for vertical"></button>
+                            <button id="btnFlowVId" class="flow-button button-v" style="vertical-align: middle; "
+                                    data-bind="visible: !isHorizontal()" title="Double-click for horizontal"></button>
+                        </div>
+                    </div>
+                    <div class="main-props-row" data-bind="visible: isCanvasVisible()">
+                        <div class="main-props-cell1">
+                            <span style="font-weight: bold;">Thumbnail View:</span>
+                        </div>
+                        <div class="main-props-cell2">
+                            <button id="btnThumbnailId" class="flow-button button-thumbnail" style="vertical-align: middle; "
+                                    title="Open thumbnail view"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 2px;"></div>
+
+            <div id="paletteAccordionId" class="accordion-props-pages">
+                <h3 id="accHdrDemoId" data-bind="text: accHdrDemoTitle"></h3>
+                <div>
+                    <table id="accSETableId" class="accordion-items galleryFont">
+                        <caption  class="settings-caption">Start / End</caption>
+                        <tbody data-bind="foreach: gallerySENodes">
+                        <tr>
+                            <td data-bind="attr: {id}"
+                                ondragstart="onPaletteDragStart(event)"
+                                ondragend="onPaletteDragEnd(event)">
+                                <img role="presentation" draggable="true" class="componentItem"
+                                     data-bind="attr: {id: id, src: url, title: title}" />
+                                <span style="user-select: none;" data-bind="text: label"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <table id="accFlowTableId" class="accordion-items galleryFont" >
+                        <caption  class="settings-caption">Flow</caption>
+                        <tbody data-bind="foreach: galleryFlowNodes">
+                        <tr>
+                            <td data-bind="attr: {id}"
+                                ondragstart="onPaletteDragStart(event)"
+                                ondragend="onPaletteDragEnd(event)">
+                                <img role="presentation" draggable="true" class="componentItem"
+                                     data-bind="attr: {id: id, src: url, title: title}" />
+                                <span style="user-select: none;" data-bind="text: label"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <!--<table id="accQuizTableId" class="accordion-items galleryFont" >-->
+                        <!--<caption  class="settings-caption">Decision</caption>-->
+                        <!--<tbody data-bind="foreach: galleryQuizNodes">-->
+                        <!--<tr>-->
+                            <!--<td data-bind="attr: {id}"-->
+                                <!--ondragstart="onPaletteDragStart(event)"-->
+                                <!--ondragend="onPaletteDragEnd(event)">-->
+                                <!--<img role="presentation" draggable="true" class="componentItem"-->
+                                     <!--data-bind="attr: {id: id, src: url, title: title}" />-->
+                                <!--<span style="user-select: none;" data-bind="text: label"></span>-->
+                            <!--</td>-->
+                        <!--</tr>-->
+                        <!--</tbody>-->
+                    <!--</table>-->
+                    <table id="accSwimTableId" class="accordion-items galleryFont" >
+                        <caption  class="settings-caption">Side Swim</caption>
+                        <tbody data-bind="foreach: gallerySwimNodes">
+                        <tr>
+                            <td data-bind="attr: {id}"
+                                ondragstart="onPaletteDragStart(event)"
+                                ondragend="onPaletteDragEnd(event)">
+                                <img role="presentation" draggable="true" class="componentItem"
+                                     data-bind="attr: {id: id, src: url, title: title}" />
+                                <span style="user-select: none;" data-bind="text: label"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <table id="accMiscTableId" class="accordion-items galleryFont" >
+                        <caption  class="settings-caption">Miscellaneous</caption>
+                        <tbody data-bind="foreach: galleryMiscNodes">
+                        <tr>
+                            <td data-bind="attr: {id}"
+                                ondragstart="onPaletteDragStart(event)"
+                                ondragend="onPaletteDragEnd(event)">
+                                <img role="presentation" draggable="true" class="componentItem"
+                                     data-bind="attr: {id: id, src: url, title: title}" />
+                                <span style="user-select: none;" data-bind="text: label"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 id="accHdrPagesId"  data-bind="visible: showPageMode, text: accHdrPagesTitle"></h3>
+                <div>
+                    <table id="accHdrPagesTableId" class="accordion-items galleryFont" >
+                        <tbody data-bind="foreach: pageNodes">
+                        <tr>
+                            <td data-bind="attr: {id}"
+                                ondragstart="onPaletteDragStart(event)"
+                                ondragend="onPaletteDragEnd(event)">
+                                <img role="presentation" draggable="true" class="componentItem"
+                                     data-bind="attr: {id: id, src: url, title: title}" />
+                                <span style="user-select: none;" data-bind="text: label"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                <!--</div>-->
+                    <div style="margin-top: 10px;" class="emptyGalleryContent" >
+                        <span style="margin-left: 30px;"></span>
+                        <span class="diagram-text galleryFont" style="font-weight: bold;">Work In Progress...</span>
+                    </div>
+                </div>
+
+                <!--<h3 id="accHdrBpelId"  data-bind="text: accHdrBpelTitle"></h3>-->
+                <!--<div class="emptyGalleryContent">-->
+                    <!--<span style="margin-left: 30px;"></span>-->
+                    <!--<span class="diagram-text galleryFont" style="font-weight: bold;">Work In Progress...</span>-->
+                <!--</div>-->
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!--<div id="topProgressId" class="progressBar-settings progressBarShow" data-bind="visible: isProgressBarVisible()" >-->
+        <!--<div id="progressBarId" class="progressBar-settings-in" data-bind="visible: isProgressBarVisible()" ></div>-->
+    <!--</div>-->
+
+    <div id="blockResizeId" class="containerGroup" style="visibility: hidden">
+        <div class="actions-toolbar">
+            <button id="extendBlockAcrossId" class="toolbar-button container-button block-extendH" data-toggle="tooltip" title="Extend Across"></button>
+            <button id="extendBlockAlongId" class="toolbar-button container-button button-no-left block-extendV" data-toggle="tooltip" title="Extend Along"></button>
+            <button id="shrinkBlockAcrossId" class="toolbar-button container-button button-no-left block-shrinkH" data-toggle="tooltip" title="Shrink Across"></button>
+            <button id="shrinkBlockAlongId" class="toolbar-button container-button button-no-left block-shrinkV" data-toggle="tooltip" title="Shrink Along"></button>
+        </div>
+    </div>
+
+    <div id="switchResizeId" class="containerGroup" style="visibility: hidden">
+        <div class="actions-toolbar">
+            <button id="extendSwitchAcrossId" class="toolbar-button container-button block-extendH" data-toggle="tooltip" title="Extend Across"></button>
+            <button id="shrinkSwitchAcrossId" class="toolbar-button container-button button-no-left block-shrinkH" data-toggle="tooltip" title="Shrink Across"></button>
+        </div>
+    </div>
+
+    <div id="thumbnailDialogId" class="settingsFont" style="display: none; ">
+        <div class="diagram-text galleryFont " style="margin-top: 2px;">
+            <span style="width: 100%;" ></span>
+        </div>
+        <div id="thumbnailViewId" class="thumbnailView" >
+            <canvas id="canvasThId" tabindex="0" draggable="true" class="thumbCanvas"></canvas>
+        </div>
+    </div>
+
+    <div id="settingsDialogId" class="settingsFont" style="display: none; overflow: hidden; ">
+        <div id="settingsTabId" style="overflow: hidden">
+            <ul>
+                <li><a href="#settingsTabId-1">General</a></li>
+                <li><a href="#settingsTabId-2">Node Size</a></li>
+                <li><a href="#settingsTabId-3">Colors</a></li>
+                <li><a href="#settingsTabId-4">Node Icons</a></li>
+                <li><a href="#settingsTabId-5">Schemes</a></li>
+                <li><a href="#settingsTabId-6">Integration</a></li>
+            </ul>
+
+            <div id="settingsTabId-1">
+
+                <!--<div class="settings-entry" style="margin: 0 0 0 4px; ">Edit / View Mode:</div>-->
+                <!--<div class="settings-controls">-->
+                    <!--<input type="radio" id="btnEditAllId" name="editMode" style="margin: 4px 4px 0 4px;">-->
+                    <!--<label for="btnEditAllId" style="vertical-align:baseline; margin: 0 20px 0 0;" >Edit</label>-->
+                    <!--<input type="radio" id="btnViewOnlyId" name="editMode" style="margin: 4px 4px 0 4px;">-->
+                    <!--<label for="btnViewOnlyId" style="vertical-align:baseline;  margin: 0 20px 4px 0;">View Only</label>-->
+                <!--</div>-->
+
+                <!--<div class="settings-entry" style="margin: 4px 0 0 4px;">Flow direction:</div>-->
+                <!--<div class="settings-controls">-->
+                    <!--<input type="radio" id="btnHorizontal" name="flowDir" style="margin: 4px 4px 0 4px;">-->
+                    <!--<label for="btnHorizontal" style="vertical-align:baseline; margin: 0 20px 0 0;" >Horizontal</label>-->
+                    <!--<input type="radio" id="btnVertical" name="flowDir" style="margin: 4px 4px 0 4px;">-->
+                    <!--<label for="btnVertical" style="vertical-align:baseline;  margin: 0 20px 4px 0;">Vertical</label>-->
+                <!--</div>-->
+
+                <div class="settingsMainGrid">
+                    <div class="settings-entry" style="margin: 4px 0 0 4px; grid-column: 1/span 4;">Edit / View Mode:</div>
+                    <div class="settings-entry" style="margin: 4px 0 0 4px; grid-column: 5/span 4;">Paging Style:</div>
+                </div>
+                <div class="settings-controls settingsMainGrid">
+                    <input type="radio" id="btnEditAllId" name="editMode" style="margin: 0 4px 0 0;">
+                    <label for="btnEditAllId" style="vertical-align:baseline; margin: 0 0 0 4px;" >Edit</label>
+                    <input type="radio" id="btnViewOnlyId" name="editMode" style="margin: 0 4px 0 0;">
+                    <label for="btnViewOnlyId" style="vertical-align:baseline;  margin: 0 0 0 4px;">View Only</label>
+                    <input type="radio" id="btnFlowchartId" name="pagingStyle" style="margin: 0 4px 0 0;">
+                    <label for="btnFlowchartId" style="vertical-align:baseline; margin: 0 0 0 4px;" >Single</label>
+                    <input type="radio" id="btnFlowPagesId" name="pagingStyle" style="margin: 0 4px 0 0;">
+                    <label for="btnFlowPagesId" style="vertical-align:baseline;  margin: 0 0 0 4px;" >Multipage</label>
+                </div>
+
+                <div class="settingsMainGrid">
+                    <div class="settings-entry" style="margin: 4px 0 0 4px; grid-column: 1/span 4;">Flow Direction:</div>
+                    <div class="settings-entry" style="margin: 4px 0 0 4px; grid-column: 5/span 4;">Layout Mode:</div>
+                </div>
+                <div class="settings-controls settingsMainGrid">
+                    <input type="radio" id="btnVertical" name="flowDir" style="margin: 0 4px 0 0;">
+                    <label for="btnVertical" style="vertical-align:baseline; margin: 0 0 0 4px;" >Vertical</label>
+                    <input type="radio" id="btnHorizontal" name="flowDir" style="margin: 0 4px 0 0;">
+                    <label for="btnHorizontal" style="vertical-align:baseline;  margin: 0 0 0 4px;">Horizontal</label>
+                    <input type="radio" id="btnManualId" name="layoutMode" style="margin: 0 4px 0 0;">
+                    <label for="btnManualId" style="vertical-align:baseline; margin: 0 0 0 4px;" >Manual</label>
+                    <input type="radio" id="btnAutoId" name="layoutMode" style="margin: 0 4px 0 0;">
+                    <label for="btnAutoId" style="vertical-align:baseline;  margin: 0 0 0 4px;">Auto</label>
+                </div>
+
+                <div class="settings-entry" style="margin: 4px 0 0 4px;">Flowchart features:</div>
+                <div class="settings-controls settingsFeaturesGrid">
+                    <input type="checkbox" id="chkStartEnd" style="margin: 4px 4px 0 0;">
+                    <label for="chkStartEnd" style="padding-top: 4px ; " >Add Start/End layers</label>
+                    <input type="checkbox" id="chkShowRefs" name="edRefs" style="margin: 4px 4px 0 0;">
+                    <label for="chkShowRefs" style="padding-top: 4px ; " >Enable association links</label>
+                    <!--<input type="checkbox" id="chkGrid" name="df" style="margin: 4px 4px 0 0;">-->
+                    <!--<label for="chkGrid" style="vertical-align:baseline;" >Show Grid</label>-->
+
+                    <input type="checkbox" id="chkLeftRight" name="df" style="margin: 4px 4px 0 0;">
+                    <label for="chkLeftRight" style="padding-top: 4px ;" >Add Side swim lanes</label>
+                    <input type="checkbox" id="chkShowLinkLabelsId" name="showLinkLabels" style="margin: 4px 4px 0 0;">
+                    <label for="chkShowLinkLabelsId" style="padding-top: 4px ; " >Show link labels on selection</label>
+
+                    <input type="checkbox" id="chkShowDBRecords" name="portCrd" style="margin: 4px 4px 0 0;">
+                    <label for="chkShowDBRecords" style="padding-top: 4px ; " >Enable database records assignment</label>
+                    <input type="checkbox" id="chkShowIconsId" name="showIcons" style="margin: 4px 4px 0 0;">
+                    <label for="chkShowIconsId" style="padding-top: 4px ;" >Show node icons</label>
+
+                    <input type="checkbox" id="chkShowCardinality" name="portCrd" style="margin: 4px 4px 0 0;">
+                    <label for="chkShowCardinality" style="padding-top: 4px ;" >Enable ports cardinality assignment</label>
+                    <input type="checkbox" id="chkAutoGen" name="edopt" style="margin: 4px 4px 0 0;">
+                    <label for="chkAutoGen" style="padding-top: 4px ;" >Auto generate new node names</label>
+
+                    <input type="checkbox" id="chkShowNodeTasks" name="portCrd" style="margin: 4px 4px 0 0;">
+                    <label for="chkShowNodeTasks" style="padding-top: 4px ; " >Enable node tasks assignment</label>
+                    <input type="checkbox" id="chkHideNamesId" name="hideNames" style="margin: 4px 4px 0 0;">
+                    <label for="chkHideNamesId" style="padding-top: 4px ; " >Hide node names</label>
+                </div>
+
+                <div class="settingsMainGrid">
+                    <div class="settings-entry" style="margin: 4px 0 0 4px; grid-column: 1/span 4;">Main canvas initial grid:</div>
+                    <!--<div class="settings-entry" style="margin: 4px 0 0 4px; grid-column: 5/span 2;">Grid Spacing:</div>-->
+                </div>
+                <div class="settings-controls settingsSpaceGrid">
+                    <input type="text" id="spinnerLevelsId" class="spinnerStyle">
+                    <label for="spinnerLevelsId" class="spinner-label" style="padding-top: 6px; " >Layers <b>*</b></label>
+                    <input type="text" id="spinnerLanesId" class="spinnerStyle">
+                    <label for="spinnerLanesId" class="spinner-label" style="padding-top: 6px ; ">Lanes <b>*</b></label>
+
+                    <!--<input type="text" id="spinnerSpaceId" class="spinnerStyle">-->
+                    <!--<label for="spinnerSpaceId" class="spinner-label" style="padding-top: 6px; " >pixels</label>-->
+                </div>
+
+                <div class="settings-entry" style="margin: 4px 0 0 4px;">Link ports presentation:</div>
+                <div class="settings-controls">
+                    <select id="selectPortIconsId" class="settingsPortIconMenu"
+                            data-bind="options: portIcons, optionsValue: 'value' ">
+                    </select>
+                </div>
+
+                <div class="settings-footer-1"></div>
+                <div>
+                    <span class="vertical" style="padding: 0 0 0 4px; ">
+                        <b>*</b> &nbsp;Choose the initial grid only, later you can modify the grid from the canvas menus</span>
+                </div>
+            </div>
+
+            <div id="settingsTabId-2">
+                <div class="settings-entry">Start / End</div>
+                <div class="settings-controls">
+                    <input type="text" id="spinnerSEWidthId" class="spinnerStyle">
+                    <label for="spinnerSEWidthId" class="spinner-label" style="margin-right: 10px;" >Width (px)</label>
+                    <input type="text" id="spinnerSEHeightId" class="spinnerStyle">
+                    <label for="spinnerSEHeightId" class="spinner-label">Height (px)</label>
+                    <button id="dmsSEDefId" class="prefs-button prefs-dms-button-def">Use Defaults</button>
+                </div>
+
+                <div class="settings-entry">Flow / Side</div>
+                <div class="settings-controls">
+                    <input type="text" id="spinnerNodeWidthId" class="spinnerStyle">
+                    <label for="spinnerNodeWidthId" class="spinner-label" style="margin-right: 10px;" >Width (px)</label>
+                    <input type="text" id="spinnerNodeHeightId" class="spinnerStyle">
+                    <label for="spinnerNodeHeightId" class="spinner-label">Height (px)</label>
+                    <button id="dmsFlowDefId" class="prefs-button prefs-dms-button-def ">Use Defaults</button>
+                </div>
+
+                <div class="settings-entry">Decision</div>
+                <div class="settings-controls">
+                    <input type="text" id="spinnerDecisionWidthId" class="spinnerStyle">
+                    <label for="spinnerDecisionWidthId" class="spinner-label" style="margin-right: 10px;" >Width (px)</label>
+                    <input type="text" id="spinnerDecisionHeightId" class="spinnerStyle">
+                    <label for="spinnerDecisionHeightId" class="spinner-label">Height (px)</label>
+                    <button id="dmsDecisionDefId" class="prefs-button prefs-dms-button-def">Use Defaults</button>
+                </div>
+
+                <div >
+                    <button id="allDmsToDefId" class="prefs-button prefs-all-button">Use All Defaults</button>
+                </div>
+                <div class="settings-footer-2"></div>
+            </div>
+
+            <div id="settingsTabId-3" style="height: 100%; ">
+
+                <div class="settings-entry" style="margin: -4px 0 4px 0;">Node type / background / foreground colors:</div>
+                <div class="typeColorsGrid">
+                    <input type="radio" id="btnSETypeId" name="typeColors" style="margin:4px 0 0 10px;">
+                    <label for="btnSETypeId" style="vertical-align:baseline; margin: 4px 4px 0 8px;" >Start / End</label>
+                    <div id="seBgnDisplayId" class="typeColorShape"></div>
+                    <div id="seFgnDisplayId" class="typeColorShape"></div>
+                    <div>
+                        <!--<input type="checkbox" id="chkSEUpdId" style="margin: 0 6px 4px 0;">-->
+                        <!--<label for="chkSEUpdId" style="vertical-align: top;" >Update</label>-->
+                    </div>
+
+                    <input type="radio" id="btnProcTypeId" name="typeColors" style="margin: 4px 0 0 10px;">
+                    <label for="btnProcTypeId" style="vertical-align:baseline; margin: 4px 4px 0 8px;" >Process</label>
+                    <div id="procBgnDisplayId" class="typeColorShape"></div>
+                    <div id="procFgnDisplayId" class="typeColorShape"></div>
+                    <div></div>
+
+                    <input type="radio" id="btnIOTypeId" name="typeColors" style="margin: 4px 0 0 10px;">
+                    <label for="btnIOTypeId" style="vertical-align:baseline; margin: 4px 4px 0 8px;" >Input / Output</label>
+                    <div id="ioBgnDisplayId" class="typeColorShape"></div>
+                    <div id="ioFgnDisplayId" class="typeColorShape"></div>
+                    <div></div>
+
+                    <input type="radio" id="btnSideTypeId" name="typeColors" style="margin: 4px 0 0 10px;">
+                    <label for="btnSideTypeId" style="vertical-align:baseline; margin: 4px 4px 0 8px;" >Side Lanes</label>
+                    <div id="sideBgnDisplayId" class="typeColorShape"></div>
+                    <div id="sideFgnDisplayId" class="typeColorShape"></div>
+                    <div></div>
+
+                    <input type="radio" id="btnDecTypeId" name="typeColors" style="margin: 4px 0 0 10px;">
+                    <label for="btnDecTypeId" style="vertical-align:baseline; margin: 4px 4px 0 8px;" >Decision</label>
+                    <div id="decBgnDisplayId" class="typeColorShape"></div>
+                    <div id="decFgnDisplayId" class="typeColorShape"></div>
+                    <div></div>
+
+                    <input type="radio" id="btnTermTypeId" name="typeColors" style="margin: 4px 0 4px 10px;">
+                    <label for="btnTermTypeId" style="vertical-align:baseline; margin:4px 4px 4px 8px;" >Endpoint</label>
+                    <div id="termBgnDisplayId" class="typeColorShape"></div>
+                    <div id="termFgnDisplayId" class="typeColorShape"></div>
+                    <div></div>
+                </div>
+
+                <div class="settings-entry" style="margin: 4px 0 4px 0;">Line colors:</div>
+                <div class="typeColorsGrid">
+                    <input type="radio" id="btnLinkTypeId" name="typeColors" style="margin: 4px 0 4px 10px;">
+                    <label for="btnLinkTypeId" style="vertical-align:baseline; margin: 4px 4px 4px 8px;" >Link</label>
+                    <div id="linkDisplayId" class="typeColorShape"></div>
+                    <div></div>
+                    <div></div>
+
+                    <input type="radio" id="btnBorderTypeId" name="typeColors" style="margin:4px 0 0 10px;">
+                    <label for="btnBorderTypeId" style="vertical-align:baseline; margin: 4px 4px 0 8px;" >Border</label>
+                    <div id="borderDisplayId" class="typeColorShape"></div>
+                    <div></div>
+                    <div></div>
+                </div>
+
+
+                <div class="settings-entry" style="margin: 4px 0 4px 0;">Select Colors:</div>
+                <div class="nodeProps-controls nodeColorSelect">
+                    <input id="typeColorPickId" type="text"  class="nodeColorItem"/>
+                    <div class="nodeColorItem">
+                        <ul style="list-style-type: none; margin: 0 0 0 18px; padding: 0;">
+                            <li >
+                                <div data-bind="visible: showBackgroundSelection">
+                                    <div class="rectColorRadio">
+                                        <input type="radio" id="btnBgnColorId" name="typeClrs" >
+                                        <label for="btnBgnColorId" style="vertical-align:baseline; " >Background</label>
+                                    </div>
+                                    <div id="bgnColorDisplayId" class="rectColorShape"></div>
+                                </div>
+                            </li>
+                            <li >
+                                <div class="rectColorRadio">
+                                    <input type="radio" id="btnFgnColorId" name="typeClrs" >
+                                    <label for="btnFgnColorId" style="vertical-align:baseline; ">Foreground</label>
+                                </div>
+                                <div id="fgnColorDisplayId" class="rectColorShape"></div>
+                            </li>
+                        </ul>
+                    </div>
+                    <button id="btnColorDefId" class="prefs-button buttonColorDef ">Use Defaults</button>
+                </div>
+
+                <div style="margin: 4px 0 0 0;"></div>
+                <div >
+                    <button id="resetAllColorsId" class="prefs-button resetColorsToDef"
+                            title="Reset to default colors">Reset All Colors</button>
+                    <button id="rollbackColorsId" class="prefs-button setAllColorsToDef"
+                            title="Reset to old colors">Rollback All</button>
+                </div>
+
+                <!--<div class="settings-footer-3"></div>-->
+            </div>
+
+            <div id="settingsTabId-4" >
+                <div class="settings-entry" style="margin: 4px 0 4px 0;">Node Category Icons:</div>
+                <div class="typeIconsGrid">
+                    <input type="radio" id="btnFlagCtgId" name="typeIcons" style="margin: 4px 0 0 10px;">
+                    <label for="btnFlagCtgId" style="vertical-align:baseline; margin: 4px 4px 0 8px;" >Start / End</label>
+                    <img id="flagIconDisplayId" class="iconKeyShape"/>
+                    <div>
+                        <!--<input type="checkbox" id="chkFlagIconUpdId" style="margin:  0 6px 4px 0;">-->
+                        <!--<label for="chkFlagIconUpdId" style="vertical-align:top;" >Update</label>-->
+                    </div>
+
+                    <input type="radio" id="btnFlowCtgId" name="typeIcons" style="margin: 4px 0 0 10px;">
+                    <label for="btnFlowCtgId" style="vertical-align:baseline; margin: 4px 4px 0 8px;" >Flow</label>
+                    <img id="flowIconDisplayId" class="iconKeyShape"/>
+                    <div>
+                        <!--<input type="checkbox" id="chkFlowIconUpdId" style="margin: 0 6px 4px 0;">-->
+                        <!--<label for="chkFlowIconUpdId" style="vertical-align: top;" >Update</label>-->
+                    </div>
+
+                    <!--<input type="radio" id="btnQuizCtgId" name="typeIcons" style="margin: 4px 0 0 10px;">-->
+                    <!--<label for="btnQuizCtgId" style="vertical-align:baseline; margin: 4px 4px 0 8px;" >Decision</label>-->
+                    <!--<img id="quizIconDisplayId" class="iconKeyShape"/>-->
+                    <!--<div>-->
+                        <!--<input type="checkbox" id="chkQuizIconUpdId" style="margin:  0 6px 4px 0;">-->
+                        <!--<label for="chkQuizIconUpdId" style="vertical-align:top;" >Update</label>-->
+                    <!--</div>-->
+
+                    <input type="radio" id="btnSideCtgId" name="typeIcons" style="margin: 4px 0 0 10px;">
+                    <label for="btnSideCtgId" style="vertical-align:baseline; margin: 4px 4px 0 8px;" >Side</label>
+                    <img id="sideIconDisplayId" class="iconKeyShape"/>
+                    <div>
+                        <!--<input type="checkbox" id="chkSideIconUpdId" style="margin: 0 6px 4px 0;">-->
+                        <!--<label for="chkSideIconUpdId" style="vertical-align: top;" >Update</label>-->
+                    </div>
+
+                </div>
+                <div class="settings-entry" style="margin: 12px 0 4px 0;">Select Category Icon:</div>
+
+                <div class="nodeProps-controls">
+                    <select id="settingIconItemsId" class="settingsIconMenu"
+                            data-bind="options: nodeEmojiItems, optionsValue: 'value'">
+                    </select>
+                </div>
+                <div >
+                    <button id="allIconsToDefId" class="prefs-button prefsIconsAllDef">Reset To Defaults</button>
+                </div>
+                <div class="settings-footer-4"></div>
+            </div>
+
+            <div id="settingsTabId-5" >
+                <div class="settings-entry" style="margin: 12px 0 4px 0;">Select Scheme:</div>
+                <div class="nodeProps-controls">
+                    <select id="settingSchemesId" class="settingsSchemeMenu" onchange="onSchemeChange()"
+                            data-bind="options: settingsSchemes, value: selectedScheme ">
+                    </select>
+                    <button id="btnDeleteSchemeId" class="prefs-button buttonSettingsScheme">Delete Scheme</button>
+                </div>
+                <div class="settings-entry" style="margin: 18px 0 4px 0;">Enter New Scheme Name:</div>
+                <div class="nodeProps-controls">
+                    <input id="newSchemeId" type="text" class="schemeName" spellcheck="false"/>
+                    <button id="btnSaveSchemeId" class="prefs-button buttonSettingsScheme">Save Scheme</button>
+                </div>
+                <div class="settings-footer-5"></div>
+            </div>
+
+            <div id="settingsTabId-6" >
+                <div class="settingsNotesTitle" data-bind="text: integrationTitle()"></div>
+                <div style="margin-top: 4px; "></div>
+                <div class="settingsNotesFont"  data-bind="text: integrationTopNotes()"></div>
+                <div style="margin-top: 10px; "></div>
+
+                <div id="integrationTabId" style="overflow: hidden">
+                    <ul>
+                        <li><a href="#integrationTabId-1">React</a></li>
+                        <li><a href="#integrationTabId-2">Angular</a></li>
+                    </ul>
+
+                    <div id="integrationTabId-1">
+                        <div class="settingsNotesTitle" data-bind="text: integrationReactTitle()"></div>
+                        <div style="margin-top: 4px; "></div>
+                        <div class="settingsNotesFont"  data-bind="text: integrationReactNotesTop()"></div>
+                        <div style="margin-top: 8px; "></div>
+
+                        <div class="nodeProps-controls">
+                            <button id="btnShowInputId" class="prefs-button buttonTextViewDef ">Show Input</button>
+                            <button id="btnShowOutputId" class="prefs-button buttonTextViewDef ">Show Output</button>
+
+                        </div>
+                        <div style="margin-top: 8px; "></div>
+                        <div class="settingsNotesFont"  data-bind="text: integrationReactNotesBottom()"></div>
+                    </div>
+
+                    <div id="integrationTabId-2">
+                        <div style="margin: 16px 20px; "></div>
+                        <div class="settingsNotesTitle" data-bind="text: integrationAngularTitle()"></div>
+                        <div style="margin: 20px 20px; "></div>
+                        <div class="settingsNotesFont"  data-bind="text: integrationAngularNotesTop()"></div>
+
+                        <div class="settings-footer-6a"></div>
+
+                    </div>
+                </div>
+                <div class="settings-footer-6"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="aboutDialogId" class="about-dlg" style="display: none; ">
+        <img class="about-img"/>
+        <div class="about-title" data-bind="text: aboutTitle()"></div>
+        <span class="selectionFont vertical" style="padding: 10px 20px 2px; "
+              data-bind="text: aboutTitle()"></span>
+        <span class="galleryFont vertical" style="padding: 0 20px; "
+             data-bind="text: aboutVersion()"></span>
+        <span class="galleryFont vertical" style="padding: 8px 20px; "
+             data-bind="text: aboutText()"></span>
+        <span class="galleryFont vertical" style="padding: 2px 20px; "
+             data-bind="html: aboutSources()"></span>
+        <span class="galleryFont vertical about-copyright" style="padding: 2px 20px 10px; "
+             data-bind="text: aboutCopyright()"></span>
+    </div>
+
+    <div id="infoDialogId" class="settingsFont" style="display: none; ">
+        <div style="font-weight: bold; margin: 4px; ">
+            <textarea id="infoTextId" rows="4" cols="30" wrap="hard" class="selectionFont"
+                       spellcheck="false" readonly
+                       data-bind="visible: infoMessageVisible, text: infoMessage"></textarea>
+        </div>
+    </div>
+
+    <div id="text1ViewDialogId" class="settingsFont" style="display: none; ">
+        <div style="font-weight: bold;">
+            <textarea id="text1ViewId" rows="400" cols="60" wrap="hard" class="selectionFont"
+                      style="border: 1px solid blue; outline: none; " spellcheck="false" readonly
+                       data-bind="visible: viewMessage1Visible, text: viewMessage1"></textarea>
+        </div>
+    </div>
+
+    <div id="text2ViewDialogId" class="settingsFont" style="display: none; ">
+        <div style="font-weight: bold;">
+            <textarea id="text2ViewId" rows="400" cols="60" wrap="hard" class="selectionFont"
+                      style="border: 1px solid blue; outline: none; " spellcheck="false" readonly
+                       data-bind="visible: viewMessage2Visible, text: viewMessage2"></textarea>
+        </div>
+    </div>
+
+    <!--<div id="textViewDialogId" class="settingsFont" style="display: none; ">-->
+        <!--<div class="selectDirView" style="font-weight: bold; margin: 4px; display: inline; ">-->
+            <!--<textarea id="text1ViewId" rows="400" cols="80" wrap="hard" class="selectionFont"-->
+                      <!--style="border: 1px solid blue;  " spellcheck="false" readonly-->
+                       <!--data-bind="visible: viewMessageVisible, text: viewMessage1"></textarea>-->
+            <!--<textarea id="text2ViewId" rows="400" cols="80" wrap="hard" class="selectionFont"-->
+                      <!--style="border: 1px solid blue; margin-left: 2px; " spellcheck="false" readonly-->
+                       <!--data-bind="visible: viewMessageVisible, text: viewMessage2"></textarea>-->
+        <!--</div>-->
+    <!--</div>-->
+
+    <div id="confirmDialogId" class="settingsFont" style="display: none; ">
+        <div style="font-weight: bold; margin: 4px; ">
+            <textarea id="confirmTextId" rows="3" cols="50" wrap="hard" class="selectionFont"
+                       spellcheck="false" readonly
+                       data-bind="text: confirmMessage"></textarea>
+        </div>
+    </div>
+
+    <div id="openFlowDialogId" class="settingsFont" style="display: none; overflow-y: hidden">
+        <div class="selectDirView" data-bind="visible: isConnectionOK()">
+            <!--<span style="margin: 8px 6px 0 0;">Partition:</span>-->
+            <!--<select id="selectPartitionId" class="settingsDiskMenu"-->
+                    <!--data-bind="options: partitionsList, value: selectedPartition ">-->
+            <!--</select>-->
+            <button id="dirsBtnUpId" class="toolbar-button button-leftDir" data-toggle="tooltip" title="Go back"></button>
+            <button id="dirsBtnDownId" class="toolbar-button button-no-left button-rightDir" data-toggle="tooltip" title="Choose new location..."></button>
+            <span style="margin-left: 10px;"></span>
+            <button id="createFolderId" class="toolbar-button button-newDir" data-toggle="tooltip" title="Create folder..."></button>
+            <button id="deleteFSId" class="toolbar-button button-no-left button-deleteFS" data-toggle="tooltip" title="Delete selected"></button>
+            <span style="font-weight: bold; margin: 8px 6px 2px 70px;">Partition:</span>
+            <input id="partitionId"  type="text" class="partitionText" readonly spellcheck="false"
+                   data-bind="textInput: selectedPartition" />
+        </div>
+
+        <div style="font-weight: bold; margin: 4px 0 4px; " data-bind="visible: isConnectionOK()">
+            <span >Location:</span>
+        </div>
+        <div class="selectDirGroup" data-bind="visible: isConnectionOK()">
+            <input id="selectedDirId" type="text" class="folderText" readonly spellcheck="false"
+                   data-bind="textInput: currentPath" />
+        </div>
+        <!--<div data-bind="visible: isConnectionOK()">-->
+            <!--<span style="font-weight: bold; margin: 6px 6px 8px 0; ">Location:</span>-->
+            <!--<input id="selectedDirId" type="text" class="folderText" readonly spellcheck="false"-->
+                   <!--data-bind="textInput: currentPath" />-->
+            <!--<span style="margin-top: 4px;"></span>-->
+        <!--</div>-->
+
+        <div id="dirsTableContainer" data-bind="visible: isConnectionOK()">
+            <table id="dirsTableId" class="galleryFont">
+                <tbody data-bind="foreach: fsContentList">
+                <tr>
+                    <td data-bind="attr: {id, fstype}"
+                        onclick="onDirTableClick(event)"
+                        ondblclick="onDirTableDblClick(event)">
+                        <img role="presentation" class="componentItem"
+                             data-bind="attr: {id: displayId, src: url, title: title}" />
+                        <span data-bind="text: label"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin: 8px 0 0 0; font-weight: bold;" data-bind="visible: isConnectionOK() && isOpenMode()">
+            <span style="margin: 16px 0 6px 0 ; ">Files Type:</span>
+            <select id="selectFileTypeId" onchange="onFileTypeChange(event)"
+                    data-bind="options: filesTypes, value: selectedFileType ">
+            </select>
+        </div>
+
+        <div data-bind="visible: !isConnectionOK()">
+            <div style="font-weight: bold; margin: 4px 0 4px; ">Select file:</div>
+            <div>
+                <select id="selectFileId" class="demoFilesMenu"
+                        data-bind="options: demoFilesItems,
+                                    optionsText: 'label',
+                                    optionsValue: 'value'">
+                </select>
+            </div>
+        </div>
+
+        <div class="selectGroup" data-bind="visible: isConnectionOK() && isSaveMode()"
+             style="margin: 2px 0 0 0;">
+            <!--<div style="font-weight: bold; margin: 6px 0 0; ">Enter file name:</div>-->
+            <span style="margin: 16px 6px 0 0 ; ">Enter file name:</span>
+            <div>
+                <input id="saveAsFileNameId" type="text" autocomplete="off" spellcheck="false"
+                       onkeyup="validateSaveAsFileName(event)" class="saveAsText"
+                       data-bind="textInput: saveAsFileNameValue, css: {invalidInput: saveAsInputInvalid() }"/>
+                <span style="margin: 4px 0px 4px 2px; font-weight: bold;">.json</span>
+            </div>
+        </div>
+        <div style="margin: 6px 0 0 0;" data-bind="visible: saveAsInputInvalid()">
+            <button class="icon-textInvalid invalidText" style="vertical-align: middle; " disabled></button>
+            <span class="invalid-message" data-bind="text: saveAsMessage()"></span>
+        </div>
+        <input type="hidden" autofocus="true" />
+    </div>
+
+    <div id="newFlowDialogId" class="settingsFont" style="display: none; ">
+        <div style="font-weight: bold; margin: 4px 0 4px; ">Enter file name:</div>
+        <div>
+            <input id="newFileNameId" type="text" autocomplete="off" spellcheck="false"
+                   onkeyup="validateFSName(event)"
+                   style="height: 20px; width: 320px; margin: 4px 0 8px;"
+                   data-bind="textInput: newFSNameValue, css: {invalidInput: isInputInvalid() }"/>
+            <span style="margin: 4px 4px 8px 4px; font-weight: bold;">.json</span>
+        </div>
+        <div>
+            <button class="icon-textInvalid invalidText" style="vertical-align: middle; "
+                    data-bind="visible: isInputInvalid()" disabled></button>
+            <span class="invalid-message"
+                    data-bind="visible: isInputInvalid(), text: validateMessage()"></span>
+        </div>
+        <div>
+        <!--<div data-bind="visible: showPageMode">-->
+            <div class="settings-entry">Content Type:</div>
+            <div class="settings-controls">
+            <input type="radio" id="btnDiagramId" name="editMode" style="margin: 4px 4px 0 4px;">
+            <label for="btnDiagramId" style="vertical-align:baseline; margin: 0 20px 0 0;" >Flowchart</label>
+            <input type="radio" id="btnPagesId" name="editMode" style="margin: 4px 4px 0 4px;">
+            <label for="btnPagesId" style="vertical-align:baseline;  margin: 0 20px 0 0;">Pages</label>
+            </div>
+        </div>
+    </div>
+
+    <div id="newFolderDialogId" class="settingsFont" style="display: none; ">
+        <div style="font-weight: bold; margin: 4px 0 8px; ">
+            <span >Location:</span>
+        </div>
+        <div class="selectDirGroup">
+            <input id="locationForNewDirId" type="text" class="folderText" readonly spellcheck="false"
+                   data-bind="textInput: currentPath" />
+        </div>
+        <div style="font-weight: bold; margin: 4px 0 4px; ">Enter folder name:</div>
+        <div>
+            <input id="newFolderNameId" type="text" autocomplete="off" spellcheck="false"
+                   onkeyup="validateFSName(event, true)" class="folderText newFolderText"
+                   data-bind="textInput: newFSNameValue, css: {invalidInput: isInputInvalid() }"/>
+        </div>
+        <div>
+            <button class="icon-textInvalid invalidText" style="vertical-align: middle; "
+                    data-bind="visible: isInputInvalid()" disabled></button>
+            <span class="invalid-message"
+                    data-bind="visible: isInputInvalid(), text: validateMessage()"></span>
+        </div>
+    </div>
+
+    <div id="linkPropsDialogId" class="settingsFont"  style="display: none;">
+        <table id="linkHeadId">
+            <thead>
+            <tr>
+                <th class="linkPropsCol0Size"></th>
+                <th class="linkPropsCol1Size">Port Name</th>
+                <th class="linkPropsCol2Size">Port Label</th>
+            </tr>
+            </thead>
+        </table>
+        <table id="linkPropsTableId" >
+            <tbody >
+            <tr>
+                <td class="linkPropsCol0Size selectionFont">Source</td>
+                <td id="propsLinkSourceNameId" title="" class="linkPropsCol1Size"
+                    data-bind="text: propsLinkSourceName()">
+                </td>
+                <td id="propsLinkSourceLabelId" title="" class="linkPropsCol2Size"
+                    data-bind="text: propsLinkSourceLabel()"></td>
+            </tr>
+            <tr>
+                <td class="linkPropsCol0Size selectionFont">Target</td>
+                <td id="propsLinkTargetNameId" title="" class="linkPropsCol1Size"
+                    data-bind="text: propsLinkTargetName()"></td>
+                <td id="propsLinkTargetLabelId" title="" class="linkPropsCol2Size"
+                    data-bind="text: propsLinkTargetLabel()"></td>
+            </tr>
+            <tr>
+                <td class="linkPropsCol0Size  selectionFont">Label</td>
+                <td colspan="2">
+                    <input id="propsLinkLabelId" class="linkPropsColLabelSize"
+                           autocomplete="off" spellcheck="false"
+                           onkeyup="editPropsLinkLabel(event)"
+                           data-bind="textInput: propsLinkLabel(), css:{invalidInput: isLinkLabelInvalid()}"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div>
+            <button class="icon-textInvalid invalidText" style="vertical-align: middle; "
+                    data-bind="visible: isLinkLabelInvalid()" disabled></button>
+            <span class="invalid-message"
+                  data-bind="visible: isLinkLabelInvalid(), text: validateLinkMessage()"></span>
+        </div>
+
+        <div style="font-weight: bold; margin: 4px 0 10px; ">
+            <input type="checkbox" id="chkPropagateLabelId" name="propagate" style="margin: 6px 2px 0 0; ">
+            <label for="chkPropagateLabelId" style="vertical-align: text-top; " >Propagate label to source & target</label>
+        </div>
+
+        <div class="settings-entry" style="margin: 4px 0 4px 0;">Link color:</div>
+        <div class="nodeProps-controls">
+            <input id='linkColorPickId' type="text"/>
+            <button id="linkColorDefId" class="prefs-button prefs-colorNode-button-def">Use Defaults</button>
+        </div>
+    </div>
+
+    <div id="findDialogId" class="settingsFont" style="display: none; ">
+        <div id="textTitleId" class="settings-entry" style="margin: 2px 0 4px 0;">Text to find:</div>
+        <div class="findText">
+            <input id="findNameId" autofocus type="text" class="findNameText"
+                   autocomplete="off" spellcheck="false"
+                   onpaste = "onPasteSearchText()"
+                   data-bind="textInput: editNameValue, css: {invalidInput: isEditNameInvalid() }"/>
+            <button id="select2findId" class="findButton button-findArrow"></button>
+        </div>
+        <div id="findTableContainer" data-bind="visible: showSearchList">
+            <table id="findTableId" class="galleryFont">
+                <tbody data-bind="foreach: searchContentList">
+                <tr>
+                    <td data-bind="text: $data"
+                        onclick="onFindTableClick(event)">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="findOptionsId"  data-bind="visible: showFindOptions">
+            <div style="margin-top: 10px;"></div>
+            <div>
+                <div class="findBlockBgnd">
+                    <button id="findBtnPrevId" class="toolbar-button button-leftDir" data-toggle="tooltip"
+                            title="Previous"></button>
+                    <button id="findBtnNextId" class="toolbar-button button-rightDir button-no-left"
+                            data-toggle="tooltip" title="Next"></button>
+                    <button id="findBtnAllId" class="toolbar-button button-findAll button-no-left"
+                            data-toggle="tooltip" title="Show All"></button>
+                    <button id="findBtnClearId" class="toolbar-button button-empty button-no-left"
+                            data-toggle="tooltip" title="Clear List"></button>
+                    <button id="findBtnResizeId" class="toolbar-button button-up button-no-left"
+                            data-toggle="tooltip" title="Collapse view"></button>
+                    <input id="foundMatchId" type="text" class="foundMatchesText" readonly spellcheck="false"
+                           data-bind="textInput: foundMatches" />
+                </div>
+            </div>
+
+            <!--<div style="margin-top: 20px;"></div>-->
+            <div id="optionsTitleId" class="settings-entry" style="margin-top: 20px;">Options:</div>
+            <div id="matchCtrId" class="settings-controls">
+                <div>
+                    <input type="checkbox" id="chkMatchCaseId" name="df" style="margin: 4px 4px 0 0;">
+                    <label for="chkMatchCaseId" style="vertical-align:baseline; margin-right: 8px;" >Match Case</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="chkMatchRegExpId" name="df" style="margin: 4px 4px 0 0;">
+                    <label for="chkMatchRegExpId" style="vertical-align:baseline; margin-right: 8px;" >Regular Expression</label>
+                </div>
+            </div>
+
+            <!--<div style="margin-top: 10px;"></div>-->
+            <div id="whichCtrId" class="settings-controls" style="margin-top: 10px;">
+                <input type="radio" id="btnFindNamesId" name="findName" style="margin: 4px 4px 0 4px;">
+                <label for="btnFindNamesId" style="vertical-align:baseline; margin: 0 14px 0 0;" >Node Names</label>
+                <input type="radio" id="btnFindContentId" name="findName" style="margin: 4px 4px 0 4px;">
+                <label for="btnFindContentId" style="vertical-align:baseline;  margin: 0 0 0 0;">Node Text Content</label>
+            </div>
+
+            <!--<div style="margin-top: 10px;"></div>-->
+            <div id="whereCtrId" class="settings-controls" style="margin-top: 10px;">
+                <input type="radio" id="btnFindStartId" name="findWhere" style="margin: 4px 4px 0 4px;">
+                <label for="btnFindStartId" style="vertical-align:baseline; margin: 0 6px 0 0;" >Beginning with</label>
+                <input type="radio" id="btnFindAnywhereId" name="findWhere" style="margin: 4px 4px 0 4px;">
+                <label for="btnFindAnywhereId" style="vertical-align:baseline;  margin: 0 0 0 0;">Anywhere Inside</label>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="nodePropsDialogId" class="settingsFont" style="display: none; overflow: hidden; ">
+        <div id="nodePropsTabId" class="nodePropsContainer">
+            <ul>
+                <li><a href="#nodePropsTabId-1">General</a></li>
+                <li><a href="#nodePropsTabId-2">Table Data</a></li>
+                <li><a href="#nodePropsTabId-3">Connectivity</a></li>
+                <li><a href="#nodePropsTabId-4">Tasks</a></li>
+            </ul>
+
+            <div id="nodePropsTabId-1" >
+                <div class="settings-entry" style="margin: 0 0 2px 0;">Node name:</div>
+                <div class="nodeProps-controls">
+                    <input id="editNodeNameId" autofocus type="text" class="nameText"
+                           autocomplete="off" spellcheck="false"
+                           onkeyup="validateEditName(event)"
+                           data-bind="textInput: editNameValue, css: {invalidInput: isEditNameInvalid() }"/>
+                    <input type="checkbox" id="chkHideNodeNameId" name="nodeNameHide" style="margin: 6px 2px 0 0; ">
+                    <label for="chkHideNodeNameId" style="vertical-align: text-top; " >Hide</label>
+                </div>
+                <div>
+                    <button class="icon-textInvalid invalidText" style="vertical-align: middle; "
+                            data-bind="visible: isEditNameInvalid()" disabled></button>
+                    <span class="invalid-message"
+                            data-bind="visible: isEditNameInvalid(), text: validateNameMessage1()"></span>
+                    <span class="invalid-message"
+                            data-bind="visible: isEditNameInvalid(), text: validateNameMessage2()"></span>
+                </div>
+
+                <div class="settings-entry" style="margin: 6px 0 2px 0;">Node Icon:</div>
+                <div class="nodeProps-controls">
+                    <select id="nodeIconItemsId" class="nodeIconMenu"
+                            data-bind="options: nodeEmojiItems, optionsValue: 'value'">
+                    </select>
+                    <input type="checkbox" id="chkShowNodeIconId" name="nodeIconShow" style="margin: 8px 2px 0 28px; ">
+                    <label for="chkShowNodeIconId" style="vertical-align: text-top;">Show Icon</label>
+                </div>
+
+                <div class="settings-entry" style="margin: 6px 0 2px 0;">Node Colors:</div>
+                <div class="nodeProps-controls prefsNodeDisplay">
+                    <input id='nodeBckGndPickId' type="text"/>
+                    <ul style="list-style-type: none; margin: 0 0 0 16px; padding: 0;">
+                        <li >
+                            <div class="rectColorRadio">
+                                <input type="radio" id="btnNodeBckgndId" name="nodeFgn" >
+                                <label for="btnNodeBckgndId" style="vertical-align:baseline; " >Background</label>
+                            </div>
+                            <div id="nodeBkgnDisplayId" class="rectColorShape"></div>
+                        </li>
+                        <li >
+                            <div class="rectColorRadio">
+                                <input type="radio" id="btnNodeForgndId" name="nodeFgn" >
+                                <label for="btnNodeForgndId" style="vertical-align:baseline; ">Foreground</label>
+                            </div>
+                            <div id="nodeFgnDisplayId" class="rectColorShape"></div>
+                        </li>
+                        <li >
+                            <div class="rectColorRadio">
+                                <input type="radio" id="btnNodeBorderId" name="nodeFgn" >
+                                <label for="btnNodeBorderId" style="vertical-align:baseline; ">Border</label>
+                            </div>
+                            <div id="nodeBorderDisplayId" class="rectColorShape"></div>
+                        </li>
+                    </ul>
+                    <button id="nodeColorDefId" class="prefs-button">Use Defaults</button>
+                </div>
+
+                <div class="settings-entry" style="margin: 6px 0 2px 0;">Node size (px):</div>
+                <div class="nodeProps-controls">
+                    <input type="text" id="spNodeWidthId" class="spinnerStyleNode" >
+                    <label for="spNodeWidthId" class="spinner-label-node">Width</label>
+                    <span style="margin: 0 0 0 10px;"></span>
+                    <input type="text" id="spNodeHeightId" class="spinnerStyleNode" >
+                    <label for="spNodeHeightId" class="spinner-label-node">Height</label>
+                    <span style="margin: 0 0 0 12px;"></span>
+                    <button id="nodeSizeDefId" class="prefs-button prefs-dmsNode-button-def">Use Defaults</button>
+                </div>
+
+                <div class="settings-entry" style="margin: 6px 0 2px 0;">Text Content:</div>
+                <div class="nodeProps-controls">
+                    <textarea id="editNodeContentId" placeholder="[Enter content...]" autofocus rows="4" cols="37" wrap="hard"
+                              spellcheck="false"></textarea>
+                </div>
+
+                <!--<div class="settings-entry" style="margin: 4px 0 2px 0;">Text Location:</div>-->
+                <div class="nodeProps-controls">
+                    <input type="radio" id="btnInsideId" name="nodeText" style="margin: 4px 0 0 4px;">
+                    <label for="btnInsideId" style="vertical-align:baseline; margin: 0 4px 0 0;" >Inside</label>
+                    <input type="radio" id="btnAboveId" name="nodeText" style="margin: 4px 0 0 6px;">
+                    <label for="btnAboveId" style="vertical-align:baseline;  margin: 0 4px 0 0;">Above</label>
+                    <input type="radio" id="btnBelowId" name="nodeText" style="margin: 4px 0 0 6px;">
+                    <label for="btnBelowId" style="vertical-align:baseline;  margin: 0 4px 0 0;">Below</label>
+                    <button id="btnTextApplyId" class="prefs-button prefs-textNode-button-apply">Confirm</button>
+                    <button id="btnTextClearId" class="prefs-button prefs-textNode-button-clear">Clear</button>
+                </div>
+
+            </div>
+
+            <div id="nodePropsTabId-2" >
+                <span>NOTE: To enable this feature, go to <b>Settings->General</b> and select <b>Enable database records assignment</b>.</span>
+
+                <div style="margin-top: 14px;"></div>
+                <div>
+                    <span  class="settings-entry">DB Table Content:</span>
+                    <button id="btnMoveRowDownId" class="toolbar-button button-down button-no-left" style="float:right; "
+                            data-toggle="tooltip" title="Move Row Down"></button>
+                    <button id="btnMoveRowUpId" class="toolbar-button button-up button-no-left" style="float:right; "
+                            data-toggle="tooltip" title="Move Row Up"></button>
+                    <button id="btnRemoveRowId" class="toolbar-button button-delete button-no-left" style="float:right; "
+                            data-toggle="tooltip" title="Remove Row"></button>
+                    <button id="btnAddRowId" class="toolbar-button button-add" data-toggle="tooltip" style="float:right; "
+                                title="Add Row"></button>
+                </div>
+
+                <div id="nodeTableContainer" style="margin-top: 20px;">
+                    <table id="nodeTableContentId" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">Key</th>
+                                <th style="width: 55%;">Field</th>
+                                <th style="width: 20%;">Type</th>
+                                <th style="width: 15%;">Length</th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: dbNodeRecords()">
+                            <tr>
+                                <td data-bind="attr: {key, title: key}">
+                                    <input data-bind="textInput: key, disable: !enableShowDB()" class="nodeTableKey"
+                                           autocomplete="on" spellcheck="false" tabindex="-1"
+                                           onclick="editNodeTableKey(event)" />
+                                </td>
+                                <td data-bind="attr: {field, title: field}">
+                                    <input data-bind="textInput: field, disable: !enableShowDB()" class="nodeTableField"
+                                           autocomplete="on" spellcheck="false" tabindex="-1"
+                                           onclick="editNodeTableField(event)" />
+                                </td>
+                                <td data-bind="attr: {type, title: type}">
+                                    <input data-bind="textInput: type, disable: !enableShowDB()" class="nodeTableType"
+                                           autocomplete="on" spellcheck="false" tabindex="-1"
+                                           onclick="editNodeTableType(event)" />
+                                </td>
+                                <td data-bind="attr: {length, title: length}">
+                                    <input data-bind="textInput: length, disable: !enableShowDB()" class="nodeTableLength"
+                                           autocomplete="on" spellcheck="false" tabindex="-1"
+                                           onclick="editNodeTableLength(event)" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="nodeProps-controls" style="margin-top: 6px;">
+                    <button id="btnTableClearId" class="prefs-button nodeTable-button-clear" title="Clear the table">Clear</button>
+                    <button id="btnTableConfirmId" class="prefs-button nodeTable-button-confirm" title="Confirm all edits">Confirm</button>
+                    <button id="btnTableResetId" class="prefs-button nodeTable-button-reset" title="Reset all edits">Reset</button>
+                </div>
+
+            </div>
+
+            <div id="nodePropsTabId-3" >
+                <div class="nodeProps-controls nodePropsTopCnxSize">
+                    <span>NOTE: Select a checkbox to choose the port cardinality.</span>
+                    <span>To enable this feature, go to <b>Settings->General</b> and select <b>Enable ports cardinality assignment</b>.</span>
+                </div>
+
+                <div id="nodeCnxContainer" style="margin-top: 8px; ">
+                    <!--<div style="margin-top: 8px; "></div>-->
+                    <table id="nodeHeadId">
+                        <thead>
+                        <tr>
+                            <th style="width:25%" class="nodePropsThNameSize">Port ID</th>
+                            <th class="nodePropsThLabelSize">Port Label / Cardinality</th>
+                        </tr>
+                        </thead>
+                    </table>
+                    <table id="nodeInputsTableId" data-bind="visible: propsNodeInputs().length > 0">
+                        <col style="width: 32%;"/>
+                        <col style="width: 8%;"/>
+                        <col style="width: 60%;"/>
+
+                        <caption  class="settings-entry" style="text-align:left">Input Links</caption>
+                        <tbody data-bind="foreach: propsNodeInputs()">
+                            <tr style="height:16px">
+                                <td class="nodePropsNameSize" title="" data-bind="text: name"></td>
+                                <td>
+                                    <input type="checkbox" data-bind="enable: enableShowCardinality()"
+                                           onchange="checkPortInputCardinality(event)"/>
+                                </td>
+                                <td data-bind="attr: {name, label}">
+                                    <input class="nodePropsLabelSize"
+                                           autocomplete="off" spellcheck="false"
+                                           onkeyup="editPropsNodeInputLabel(event)" data-bind="textInput: label"/>
+                                </td>
+                                <td>
+                                    <select style="display: none; padding: 0; margin: 0; "
+                                            data-bind="options: cardinalityItems, optionsValue: 'value'">
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table id="nodeOutputsTableId" data-bind="visible: propsNodeOutputs().length > 0">
+                        <col style="width: 32%;"/>
+                        <col style="width: 8%;"/>
+                        <col style="width: 60%;"/>
+                        <caption  class="settings-entry" style="text-align:left">Output Links</caption>
+                        <tbody data-bind="foreach: propsNodeOutputs()">
+                            <tr style="height:16px">
+                                <td class="nodePropsNameSize" title="" data-bind="text: name"></td>
+                                <td>
+                                    <input type="checkbox"  data-bind="enable: enableShowCardinality()"
+                                           onchange="checkPortOutputCardinality(event)"/>
+                                </td>
+                                <td data-bind="attr: {name, label}">
+                                    <input class="nodePropsLabelSize"
+                                           autocomplete="off" spellcheck="false"
+                                           onkeyup="editPropsNodeOutputLabel(event)" data-bind="textInput: label"/>
+                                </td>
+                                <td>
+                                    <select style="display: none; padding: 0; "
+                                            data-bind="options: cardinalityItems, optionsValue: 'value'">
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table id="nodeRefInputsTableId" data-bind="visible: propsNodeRefInputs().length > 0">
+                        <col style="width: 32%;"/>
+                        <col style="width: 8%;"/>
+                        <col style="width: 60%;"/>
+                        <caption  class="settings-entry" style="text-align:left">Input Associations</caption>
+                        <tbody data-bind="foreach: propsNodeRefInputs()">
+                            <tr style="height:16px">
+                                <td class="nodePropsNameSize" title="" data-bind="text: name"></td>
+                                <td></td>
+                                <td data-bind="attr: {name, label}">
+                                    <input class="nodePropsLabelSize"
+                                           autocomplete="off" spellcheck="false"
+                                           onkeyup="editPropsNodeRefInputLabel(event)" data-bind="textInput: label"/>
+                                </td>
+                                <td>
+                                    <select style="display: none; padding: 0; "
+                                            data-bind="options: cardinalityItems, optionsValue: 'value'">
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table id="nodeRefOutputsTableId" data-bind="visible: propsNodeRefOutputs().length > 0">
+                        <col style="width: 32%;"/>
+                        <col style="width: 8%;"/>
+                        <col style="width: 60%;"/>
+                        <caption colspan="2" class="settings-entry" style="text-align:left">Output Associations</caption>
+                        <tbody data-bind="foreach: propsNodeRefOutputs()">
+                            <tr style="height:16px">
+                                <td class="nodePropsNameSize" title="" data-bind="text: name"></td>
+                                <td></td>
+                                <td data-bind="attr: {name, label}">
+                                    <input class="nodePropsLabelSize"
+                                           autocomplete="off" spellcheck="false"
+                                           onkeyup="editPropsNodeRefOutputLabel(event)" data-bind="textInput: label"/>
+                                </td>
+                                <td>
+                                    <select style="display: none; padding: 0; "
+                                            data-bind="options: cardinalityItems, optionsValue: 'value'">
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="nodePropsTabId-4">
+
+                <span>NOTE: Select checkboxes to choose the node tasks.</span><br>
+                <span>To enable this feature, go to <b>Settings->General</b> and select <b>Enable node tasks assignment</b>.</span>
+
+                <div class="settings-entry" style="margin: 6px 0 2px 0;">Actions:</div>
+                <div class="nodeProps-controls" style="display: flex; ">
+                    <input type="checkbox" id="chkSelectActionsId" style="margin: 0 20px 0 4px;">
+                    <select id="nodeActionsId" class="nodeOpsMenu"
+                            data-bind="options: nodeActionsList,
+                                optionsText: 'label',
+                                optionsValue: 'value'">
+                    </select>
+                    <button id="nodeActionDetailsId" disabled class="toolbar-button button-find" data-toggle="tooltip" style="margin-left: 6px;"
+                            title="Action Details"></button>
+                </div>
+
+                <div class="settings-entry" style="margin: 2px 0 2px 0;">Services:</div>
+                <div class="nodeProps-controls" style="display: flex; ">
+                    <input type="checkbox" id="chkSelectServicesId" style="margin: 0 20px 0 4px;">
+                    <select id="nodeServicesId" class="nodeOpsMenu"
+                            data-bind="options: nodeServicesList,
+                                optionsText: 'label',
+                                optionsValue: 'value'">
+                    </select>
+                    <button id="nodeServiceDetailsId" class="toolbar-button button-find" data-toggle="tooltip" style="margin-left: 6px;"
+                            title="Service Details"></button>
+                </div>
+
+                <div class="settings-entry" style="margin: 2px 0 2px 0;">Operations:</div>
+                <div class="nodeProps-controls" style="display: flex; ">
+                    <input type="checkbox" id="chkSelectOperationsId" style="margin: 0 20px 0 4px;">
+                    <select id="nodeOperationsId" class="nodeOpsMenu"
+                            data-bind="options: nodeOperationsList,
+                                optionsText: 'label',
+                                optionsValue: 'value'">
+                    </select>
+                    <button id="nodeOperationDetailsId" class="toolbar-button button-find" data-toggle="tooltip" style="margin-left: 6px;"
+                            title="Operation Details"></button>
+                </div>
+
+                <div class="settings-entry" style="margin: 2px 0 2px 0;">Subscribe:</div>
+                <div class="nodeProps-controls" style="display: flex; ">
+                    <input type="checkbox" id="chkSelectSubscribeId" style="margin: 0 20px 0 4px;">
+                    <select id="nodeSubscribeId" class="nodeOpsMenu"
+                            data-bind="options: nodeSubscribeList,
+                                optionsText: 'label',
+                                optionsValue: 'value'">
+                    </select>
+                    <button id="nodeSubscribeDetailsId" class="toolbar-button button-find" data-toggle="tooltip" style="margin-left: 6px;"
+                            title="Subscribe Details"></button>
+                </div>
+
+                <div class="settings-entry" style="margin: 2px 0 2px 0;">Publish:</div>
+                <div class="nodeProps-controls" style="display: flex; ">
+                    <input type="checkbox" id="chkSelectPublishId" style="margin: 0 20px 0 4px;">
+                    <select id="nodePublishId" class="nodeOpsMenu"
+                            data-bind="options: nodePublishList,
+                                optionsText: 'label',
+                                optionsValue: 'value'">
+                    </select>
+                    <button id="nodePublishDetailsId" class="toolbar-button button-find" data-toggle="tooltip" style="margin-left: 6px;"
+                            title="Publish Details"></button>
+                </div>
+
+                <div class="settings-entry" style="margin: 2px 0 2px 0;">Expressions:</div>
+                <div class="nodeProps-controls"  style="display: flex; ">
+                    <input type="checkbox" id="chkSelectExpressionsId" name="nodetasks" style="margin: 0px 20px 0 4px;">
+                    <textarea id="nodeExpressionsId" placeholder="[Enter content...]" autofocus rows="3" cols="42" wrap="hard"
+                              spellcheck="false"></textarea>
+                </div>
+
+                <br><br><br>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- NEW NODE DIALOG -->
+    <div id="newNodeDialogId" class="settingsFont" style="display: none; ">
+        <div data-bind="visible: showNewFileName()">
+            <div>
+                <img role="presentation" class="componentItem"
+                     data-bind="attr: {src: getDecisionIcon()}" />
+                <span style=" margin: 4px 0 4px 8px; ">Enter node name:&nbsp;</span>
+            </div>
+            <!--<div style="font-weight: bold; margin: 4px 0 4px; ">Enter node name:</div>-->
+            <div>
+                <input id="newNodeNameId" type="text" autocomplete="off" spellcheck="false" tabindex="0"
+                       onkeyup="validateNodeName(event)"
+                       style="height: 20px; width: 200px; margin: 4px 0 8px;"
+                       data-bind="textInput: newNodeNameValue, css: {invalidInput: isNodeNameInvalid() }"/>
+            </div>
+            <div>
+                <button class="icon-textInvalid invalidText" style="vertical-align: middle; "
+                        data-bind="visible: isNodeNameInvalid()" disabled></button>
+                <span class="invalid-message"
+                        data-bind="visible: isNodeNameInvalid(), text: invalidNameMessage()"></span>
+            </div>
+        </div>
+
+        <div data-bind="visible: showEditedInfo()" style="display: inline;">
+            <img role="presentation" class="componentItem"
+                 data-bind="attr: {src: getDecisionIcon()}" />
+            <span style=" margin: 4px 0 4px 8px; ">Decision Node:&nbsp;</span>
+            <span style=" margin: 4px 0 4px; " data-bind="text: editedDecisionNodeName"></span>
+        </div>
+
+        <div id="decision-layout" data-bind="visible: showDecisionInfo()" style="margin: 14px 0 8px 0; ">
+            <!--<h4>Select decision input location:</h4>-->
+            <!--<div data-bind="visible: showDecisionInfo()" class="decision-top" >-->
+                <!--<div class="decision-item">-->
+                    <!--<button id="inputPrevId" style="width: 32px;" class="flow-button button-decisionPrev"></button>-->
+                <!--</div>-->
+                <!--<div class="decision-item" >-->
+                    <!--<img role="presentation" data-bind="attr: {src: decisionInputPicture}" />-->
+                <!--</div>-->
+                <!--<div class="decision-item">-->
+                    <!--<button id="inputNextId" style="width: 32px;" class="flow-button button-decisionNext"></button>-->
+                <!--</div>-->
+            <!--</div>-->
+            <h4>Select decision ends locations:</h4>
+            <div data-bind="visible: showDecisionInfo()" class="decision-top" >
+                <div class="decision-item">
+                    <button id="endsPrevId" style="width: 32px;" class="flow-button button-decisionPrev"></button>
+                </div>
+                <div class="decision-item" >
+                    <img role="presentation" data-bind="attr: {src: decisionEndsPicture}" />
+                </div>
+                <div class="decision-item">
+                    <button id="endsNextId" style="width: 32px;" class="flow-button button-decisionNext"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="saveOverlayId" class="overlayMessage">
+        <div id="saveMessageId" class="overlaySaveText" data-bind="text: overlayText()"></div>
+    </div>
+
+
+</body>
+</html>
